@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.awall.awalladmin.dao.UserMapper">
+
+    <resultMap id="userMap" type="User">
+        <id column="user_id" property="userId"/>
+        <result column="tel" property="tel"/>
+        <result column="password" property="password"/>
+        <result column="head_img" property="headImg"/>
+        <result column="nikename" property="nikename"/>
+        <result column="signature" property="signature"/>
+        <result column="hobby" property="hobby"/>
+        <result column="college" property="college"/>
+        <result column="real_name" property="realName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="ac" property="ac"/>
+        <result column="login_time" property="loginTime"/>
+        <result column="login_ip" property="loginIp"/>
+        <result column="background_img" property="backgroundImg"/>
+        <result column="salt" property="salt"/>
+    </resultMap>
+    <!--查所有-->
+    <select id="queryUsers" resultMap="userMap">
+        select user_id,
+               tel,
+               password,
+               head_img,
+               nikename,
+               signature,
+               hobby,
+               college,
+               real_name,
+               create_time,
+               ac,
+               login_time,
+               login_ip,
+               background_img,
+               salt
+        from tb_user;
+    </select>
+    <select id="findUserByTel" resultMap="userMap">
+        select user_id, tel, password, head_img, nikename, signature, hobby, college, real_name, create_time, ac, login_time, login_ip, background_img, salt
+        from tb_user where tel = #{ tel }
+    </select>
+    <select id="findUserById" resultMap="userMap">
+        select user_id, tel, password, head_img, nikename, signature, hobby, college, real_name, create_time, ac, login_time, login_ip, background_img, salt
+        from tb_user where user_id = #{ userId }
+    </select>
+    <!--插入-->
+    <insert id="addUser" parameterType="User" useGeneratedKeys="true" keyColumn="user_id" keyProperty="userId">
+        insert into `tb_user`(`user_id`, `tel`, `password`, `head_img`, `nikename`, `signature`, `hobby`, `college`,
+                              `real_name`, `create_time`, `ac`, `login_time`, `login_ip`, `background_img`, `salt`)
+        values (#{ userId }, #{ tel }, #{ password }, #{ headImg }, #{ nikename }, #{ signature }, #{ hobby },
+                #{ college }, #{ realName }, #{ createTime }, #{ ac }, #{ loginTime }, #{ loginIp }, #{ backgroundImg },
+                #{ salt });
+    </insert>
+    <!--删除-->
+    <delete id="delUserById">
+        delete
+        from tb_user
+        where user_id = #{ userId }
+    </delete>
+    <!--更新-->
+    <update id="updateUserByMap">
+        update `tb_user`
+        <set>
+            <if test="tel!=null and tel!=''">
+                `tel` = #{tel},
+            </if>
+            <if test="password!=null and password!=''">
+                `password` = #{password},
+            </if>
+            <if test="headImg!=null and headImg!=''">
+                `head_img` = #{headImg},
+            </if>
+            <if test="nikename!=null and nikename!=''">
+                `nikename` = #{nikename},
+            </if>
+            <if test="signature!=null and signature!=''">
+                `signature` = #{signature},
+            </if>
+            <if test="hobby!=null and hobby!=''">
+                `hobby` = #{hobby},
+            </if>
+            <if test="college!=null and college!=''">
+                `college` = #{college},
+            </if>
+            <if test="real_name!=null and real_name!=''">
+                `real_name` = #{realName},
+            </if>
+            <if test="create_time!=null and create_time!=''">
+                `createTime` = #{createTime},
+            </if>
+            <if test="ac!=null and ac!=''">
+                `ac` = #{ac},
+            </if>
+            <if test="login_time!=null and login_time!=''">
+                `loginTime` = #{loginTime},
+            </if>
+            <if test="login_ip!=null and login_ip!=''">
+                `loginIp` = #{loginIp},
+            </if>
+            <if test="background_img!=null and background_img!=''">
+                `backgroundImg` = #{backgroundImg},
+            </if>
+            <if test="salt!=null and salt!=''">
+                `salt` = #{salt},
+            </if>
+        </set>
+        <where>user_id=#{userId}</where>
+    </update>
+
+    <!-- 通过手机号修改密码和盐-重置密码 -->
+    <update id="updateUserByTel" parameterType="User">
+        update tb_user
+        set password = #{password},salt = #{salt}
+        where tel = #{tel}
+    </update>
+
+    <!-- 查询当前手机号的用户数，以判断用户是否已经注册！ -->
+    <select id="queryByIdCount" parameterType="String" resultType="int">
+        select count(tel)
+        from tb_user
+        where tel = #{tel}
+    </select>
+
+    <!-- 通过手机号去查询此人加密前的盐 -->
+    <select id="querySaltByTel" resultType="String" parameterType="String">
+        select salt
+        from tb_user
+        where tel = #{tel}
+    </select>
+
+    <!-- 通过账号密码登录 -->
+    <select id="queryLogin" parameterType="User" resultType="int">
+        select count(tel)
+        from tb_user
+        where tel = #{tel}
+          and password = #{password}
+    </select>
+
+
+</mapper>

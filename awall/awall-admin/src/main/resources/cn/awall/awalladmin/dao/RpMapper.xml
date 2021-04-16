@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.awall.awalladmin.dao.RpMapper">
+
+    <insert id="addRp">
+        insert into tb_rp(id, permission_id, role_id)
+        values (#{id}, #{permissionId}, #{roleId});
+    </insert>
+
+    <delete id="delRpById">
+        delete
+        from tb_rp
+        where id = #{id}
+    </delete>
+
+    <delete id="delRpByPermissionId">
+        delete
+        from tb_rp
+        where permission_id = #{permissionId}
+    </delete>
+
+    <delete id="delRpByRoleId">
+        delete
+        from tb_rp
+        where role_id = #{roleId}
+    </delete>
+</mapper>

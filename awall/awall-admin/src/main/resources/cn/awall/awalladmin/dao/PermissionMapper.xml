@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.awall.awalladmin.dao.PermissionMapper">
+    <!--PermissionMap-->
+    <resultMap id="PermissionMap" type="Permission">
+        <id column="permission_id" property="permissionId"/>
+        <result column="per_code" property="perCode"/>
+        <result column="per_desc" property="perDesc"/>
+    </resultMap>
+
+    <!--query-->
+    <select id="queryPermissions" resultMap="PermissionMap">
+        select permission_id, per_code, per_desc
+        from tb_permission;
+    </select>
+
+    <select id="findPermissionById" resultMap="PermissionMap">
+        select permission_id, per_code, per_desc
+        from tb_permission
+        where permission_id = #{ permissionId }
+    </select>
+
+    <select id="getPermissionsByUserId" resultType="java.util.Set">
+        select tb_permission.per_code
+        from tb_permission inner join tb_rp tr on tb_permission.permission_id = tr.permission_id
+        inner join tb_role t on tr.role_id = t.role_id
+        inner join tb_ur tu on t.role_id = tu.role_id
+        inner join tb_user u on tu.user_id = u.user_id
+        where u.user_id = #{ userId }
+    </select>
+
+    <!--insert-->
+    <insert id="addPermission" parameterType="Permission" useGeneratedKeys="true" keyColumn="permission_id"
+            keyProperty="permissionId">
+        insert into tb_permission
+        values (#{permissionId}, #{perCode}, #{perDesc});
+    </insert>
+
+    <!--del-->
+    <delete id="delPermissionById">
+        delete
+        from tb_permission
+        where permission_id = #{permissionId}
+    </delete>
+
+    <!--update-->
+    <update id="updatePermissionByMap" parameterType="map">
+        update tb_permission
+        <set>
+            <if test="perCode!=null and perCode!=''">
+                per_code = #{perCode},
+            </if>
+            <if test="perDesc!=null and perDesc!=''">
+                per_desc = #{perDesc},
+            </if>
+        </set>
+        <where>
+            permission_id = #{permissionId}
+        </where>
+    </update>
+</mapper>

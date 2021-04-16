@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:th="http://www.thylemeaf.org/">
+
+<head>
+    <meta charset="UTF-8">
+    <title>登录页面</title>
+</head>
+<body>
+<h1>登录系统</h1>
+<form th:action="@{/login}" method="post">
+    <input name="tel" type="text" placeholder="手机号"><br>
+    <input name="password" type="password" placeholder="密码"><br>
+    <!--验证码输入框-->
+    <input class="verifyInput" name="randomText" placeholder="请输入验证码">
+    <!--    /*验证码图片*/-->
+    <img class="verifyCode" onclick="changeCode()" th:src="@{/getVerifyCode}">
+    <input type="submit" value="登录">
+</form>
+<hr>
+<h1>找回密码</h1>
+<form th:action="@{/reset}" method="post">
+    <input id="tel" type="tel" name="tel" lay-verify="required|phone" autocomplete="off" placeholder="手机号"
+           onblur="checkPhone()"><span
+        id="msgp1"></span><br>
+
+    <input type="text" name="yzm" placeholder="验证码"><br> <span id="msgp2"></span><br>
+    <input id="btn" type="button" style="float:left" value="免费获取验证码"/><br>
+    <input type="password" name="password" placeholder="密码"><br>
+    <input type="submit" value="重置密码">
+</form>
+<script th:src="@{/js/jquery-3.5.1.js}"></script>
+<script>
+    function a() {
+        $.post({
+                url: "resettel",
+                data: {"tel": $("#tel").val()},
+                success: function (data) {
+                    $("#msgp1").html(data);
+                    if (data == "该账号未注册！") {
+                        $("#msgp1").css("color", "red");
+                    } else {
+                        $("#msgp1").css("color", "green");
+                    }
+                }
+            }
+        )
+    }
+
+    function b() {
+        $.post({
+                url: "resetsms",
+                data: {"tel": $("#tel").val()},
+                success: function (data) {
+                    $("#msgp2").html(data);
+                }
+            }
+        )
+    }
+</script>
+<script>
+    function checkPhone() {
+        var phone = document.getElementById('tel').value;
+        if (phone != '') {
+            if (!(/^1[34578]\d{9}$/.test(phone))) {
+                alert("手机号码有误，请重填");
+                return false;
+            } else a();
+        }
+    }
+</script>
+<script type="text/javascript">
+    var wait = 60;
+
+    function time(o) {
+        if (wait == 0) {
+            o.removeAttribute("disabled");
+            o.value = "免费获取验证码";
+            wait = 60;
+        } else {
+            o.setAttribute("disabled", true);
+            o.value = "重新发送(" + wait + ")";
+            wait--;
+            setTimeout(function () {
+                time(o)
+            }, 1000)
+        }
+    }
+
+    document.getElementById("btn").onclick = function () {
+        b();
+        time(this);
+    }
+
+    /*点击刷新验证码*/
+
+    function changeCode(){
+
+        var src = "getVerifyCode?"+new Date().getTime(); //加时间戳，防止浏览器利用缓存
+
+        $('.verifyCode').attr("src",src);                  //jQuery写法
+
+    }
+</script>
+</body>
+</html>

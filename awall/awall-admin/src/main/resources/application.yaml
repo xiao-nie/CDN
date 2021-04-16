@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: "000000"
+    url: jdbc:mysql://localhost:3306/awall?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+    username: root
+
+  # Redis连接
+  redis:
+#    host: 81.70.207.162
+    host: localhost
+    port: 6379
+
+mybatis:
+  type-aliases-package: cn.awall.awalladmin.pojo
+  configuration:
+    log-impl: org.apache.ibatis.logging.log4j.Log4jImpl
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com:
+      dandelion:
+        delivery:
+          admin:
+            mapper: debug
+
+# 腾讯云短信接口
+txsms:
+  AppId: 1400496989
+  AppKey: 7a36018f765e0d3c5b3cfa433001f655
+  templateID: 894527
+  signName: lovelc网
+  min: 5
+
+
+

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.awall.awalladmin.dao.SubMapper">
+
+    <insert id="addSub" parameterType="Sub">
+        insert into tb_sub(sub_id, sub_user_id, pub_user_id)
+            value (
+                   #{subId}
+                       #{subUserId},
+                   #{pubUserId}
+            )
+    </insert>
+
+    <delete id="deleteSub" parameterType="Long">
+        delete
+        from tb_sub
+        where sub_id = #{subId}
+    </delete>
+
+    <update id="updateSub" parameterType="Sub">
+        update tb_sub
+        <set>
+            <if test="subUserId != null and subUserId != ''">
+                sub_user_id = #{subUserId},
+            </if>
+            <if test="pubUserId != null and pubUserId != ''">
+                pub_user_id = #{pubUserId},
+            </if>
+        </set>
+        <where>
+            <if test="subId != null and subId != ''">
+                sub_id = #{subId}
+            </if>
+        </where>
+    </update>
+
+    <select id="selectSub" parameterType="Sub" resultType="Sub">
+        select * from tb_sub
+        <where>
+            <if test="subId != null and subId != ''">
+                and sub_id = #{subId}
+            </if>
+            <if test="subUserId != null and subUserId != ''">
+                and sub_user_id = #{subUserId}
+            </if>
+            <if test="pubUserId != null and pubUserId != ''">
+                and pub_user_id = #{pubUserId}
+            </if>
+        </where>
+    </select>
+
+</mapper>
+
