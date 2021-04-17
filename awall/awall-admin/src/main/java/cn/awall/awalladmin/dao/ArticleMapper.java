@@ -22,8 +22,6 @@ public interface ArticleMapper {
     //通过条件查询文章
     public List<Article> selectArticleByArticle(Article article);
 
-    Article queryArticleById(Long id);
-
     // 分页查询
     List<Article> selectByLimit(int start,int len);
 
@@ -32,7 +30,4 @@ public interface ArticleMapper {
 
     //将历史热度持久化
     public int updateCountById(Long articleId, Long count);
-
-    //浏览量+1
-    public int countInc(Long articleId);
 }

@@ -25,14 +25,4 @@ public class ArticleServiceImpl implements ArticleService {
         List<Article> articles = articleMapper.selectByLimit((pageNum-1)*(len+1), len);
         return articles;
     }
-
-    @Override
-    public Article queryArticleById(Long id) {
-        return articleMapper.queryArticleById(id);
-    }
-
-    @Override
-    public int countAdd(Long id) {
-        return articleMapper.countInc(id);
-    }
 }

@@ -26,12 +26,12 @@ logging:
             mapper: debug
 
 # 腾讯云短信接口
-#txsms:
-#  AppId: 1400496989
-#  AppKey: 7a36018f765e0d3c5b3cfa433001f655
-#  templateID: 894527
-#  signName: lovelc网
-#  min: 5
+txsms:
+  AppId: 1400496989
+  AppKey: 7a36018f765e0d3c5b3cfa433001f655
+  templateID: 894527
+  signName: lovelc网11
+  min: 5
 
 
 

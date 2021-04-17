@@ -27,6 +27,5 @@ public class Article {
     private String classify; //分类
     private Integer star; //点赞
     private Long count; //浏览量
-    private String imgs;//图片的地址
 
 }

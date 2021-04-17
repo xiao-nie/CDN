@@ -16,7 +16,6 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,11 +47,14 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+    private String yzm_reg = "_yzm_reg";
+    private String yzm_reset = "_yzm_reset";
+
 
     @PostMapping("/tel")
     public String isUser(@RequestBody Object data) throws JsonProcessingException {
 
-        Map<String,String> map = new ObjectMapper().readValue(JSON.toJSONString(data),Map.class);
+        Map<String, String> map = new ObjectMapper().readValue(JSON.toJSONString(data), Map.class);
         String tel = map.get("tel");
         if (!MobileUtils.isMobileNO(tel)) {
             return "手机号格式不正确！";
@@ -93,7 +95,7 @@ public class UserController {
         System.out.println(Msg);
 
         //将手机号和验证码放到Redis中
-        redisUtils.set(tel, yzm, 300L);
+        redisUtils.set(tel+yzm_reg, yzm, 300L);
 
         return "短信发送成功";
     }
@@ -101,15 +103,15 @@ public class UserController {
     @PostMapping("/register")
     public String register(@RequestBody Object token) throws JsonProcessingException {
         System.out.println("用户注册");
-        Map<String,String > map = new ObjectMapper().readValue(JSON.toJSONString(token), Map.class);
-        if (!map.get("code").equals(redisUtils.get(map.get("tel")))) {
+        Map<String, String> map = new ObjectMapper().readValue(JSON.toJSONString(token), Map.class);
+        if (!map.get("code").equals(redisUtils.get(map.get("tel")+yzm_reg))) {
             return "验证码错误！";
         }
         User user = new User();
         user.setTel(map.get("tel"));
         user.setPassword(map.get("password"));
         user.setNikename(map.get("nikename"));
-        System.out.println("register controller:"+user);
+        System.out.println("register controller:" + user);
         boolean register = userService.register(user);
         if (register) {
             return "注册成功！";
@@ -151,10 +153,10 @@ public class UserController {
 //        boolean login = userService.login(user);
         Subject subject = SecurityUtils.getSubject();
         try {
-            subject.login(new UsernamePasswordToken(user.getTel(),user.getPassword()));
+            subject.login(new UsernamePasswordToken(user.getTel(), user.getPassword()));
             // 将当前会话的手机号存一波
 
-            request.getSession().setAttribute("userId",String.valueOf(userMapper.findUserByTel(user.getTel()).getUserId()));
+            request.getSession().setAttribute("userId", userMapper.findUserByTel(user.getTel()).getUserId());
             return new CommonResult<>(200, "登录成功");
         } catch (AuthenticationException e) {
             e.printStackTrace();
@@ -239,7 +241,7 @@ public class UserController {
         System.out.println(Msg);
 
         //将手机号和验证码放到Redis中
-        redisUtils.set(tel, yzm, 300L);
+        redisUtils.set(tel+yzm_reset, yzm, 300L);
 
         return "短信发送成功";
     }
@@ -257,7 +259,7 @@ public class UserController {
             return "账号不存在，不允许重置密码!";
         }
 
-        if (!yzm.equals(redisUtils.get(user.getTel()))) {
+        if (!yzm.equals(redisUtils.get(user.getTel()+yzm_reset))) {
             return "验证码错误！";
         }
 
@@ -275,26 +277,41 @@ public class UserController {
 
     @SneakyThrows
     @PostMapping("/user/getUser/{id}")
-    public CommonResult<String> getUser(@PathVariable Long id){
+    public CommonResult<String> getUser(@PathVariable Long id) {
         User user = userService.getUser(id);
-        if (user!=null){
+        if (user != null) {
             String res = mapper.writeValueAsString(user);
-            return new CommonResult<>(200,res);
-        }else {
-            return new CommonResult<>(500,"此用户不存在");
+            return new CommonResult<>(200, res);
+        } else {
+            return new CommonResult<>(500, "此用户不存在");
         }
     }
 
     // 是否登录
     @GetMapping("/isLogin")
-    public boolean isLogin(HttpServletRequest request){
-        try {
-            Long.valueOf((String) request.getSession().getAttribute("userId"));
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            return false;
+    public boolean isLogin(HttpServletRequest request) {
+        Long userId = (Long) request.getSession().getAttribute("userId");
+        return null != userId;
+    }
+
+    //获取该用户信息
+    @RequestMapping("/getUserById")
+    public String getUserById(Long userId){
+
+        User user = userService.getUser(userId);
+
+        Integer i ;
+
+        if (user!=null){
+            i = 500;
+        } else {
+            i=200;
         }
-        return true;
+
+        CommonResult<User> result = new CommonResult<>(i,user);
+
+        return result.toString();
+
     }
 
 
