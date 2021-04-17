@@ -28,5 +28,4 @@ public interface UserService {
 
     //判断盖id是否存在
     boolean isUserById(Long userId);
-
 }

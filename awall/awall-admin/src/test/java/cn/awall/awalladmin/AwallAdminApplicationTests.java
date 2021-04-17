@@ -1,6 +1,5 @@
 package cn.awall.awalladmin;
 
-import cn.awall.awalladmin.service.impl.HotServiceImpl;
 import cn.awall.awalladmin.utils.RedisUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -10,8 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.annotation.Resource;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
@@ -264,30 +261,16 @@ class AwallAdminApplicationTests {
     @Autowired
     private RedisUtils redisUtils;
 
-    @Resource
-    private HotServiceImpl hotService;
-
     @Test
     public void test05() {
 
-        for (int i = 0; i < 150; i++) {
-            hotService.heating("1","zan");
-        }
+        String tel = "17605674681";
+        String yzm = "xiaonie";
 
-        for (int i = 0; i < 200; i++) {
-            hotService.heating("2","zan");
-        }
+        boolean set = redisUtils.set(tel, yzm, 20L);
+        System.out.println("set = " + set);
+        System.out.println(redisUtils.get(tel));
 
-        for (int i = 0; i < 100; i++) {
-            hotService.heating("3","zan");
-        }
-
-        for (int i = 0; i < 70; i++) {
-            hotService.heating("4","zan");
-        }
-
-        Map<String, Integer> hot = hotService.getHot();
-        System.out.println("hot = " + hot);
 
     }
 

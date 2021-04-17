@@ -1,8 +1,10 @@
 package cn.awall.awalladmin.controller;
 
 import cn.awall.awalladmin.pojo.Article;
+import cn.awall.awalladmin.pojo.UFile;
 import cn.awall.awalladmin.pojo.User;
 import cn.awall.awalladmin.service.ArticleService;
+import cn.awall.awalladmin.service.FileService;
 import cn.awall.awalladmin.service.UserService;
 import cn.awall.awalladmin.vo.CommonResult;
 import com.alibaba.fastjson.JSON;
@@ -25,6 +27,8 @@ public class ArticleController {
     private ArticleService articleService;
     @Resource
     private UserService userService;
+    @Resource
+    private FileService fileService;
 
     //分页查询
     @SneakyThrows
@@ -34,6 +38,20 @@ public class ArticleController {
         ArrayList<ObjectNode> list = new ArrayList<>();
         List<Article> articles = articleService.getArticlesByPage(page, len);
         for (Article article : articles) {
+            //处理文章中的图片
+            String imgs = article.getImgs();
+            StringBuilder sb = new StringBuilder();
+            if (imgs!= null&&!"".equals(imgs)){
+                String[] ids = imgs.split(",");
+                for (int i=0;i < ids.length; i++) {
+                    UFile uFile = fileService.queryById(Long.valueOf(ids[i]));
+                    sb.append(uFile.getUrl());
+                    if (i<ids.length-1){
+                        sb.append(",");
+                    }
+                }
+            }
+            String urls = sb.toString();
             Long userId = article.getUserId();
             User user = userService.getUser(userId);
             ObjectNode node = mapper.createObjectNode();
@@ -44,7 +62,7 @@ public class ArticleController {
             node.put("user",userNode);
             node.put("date",article.getDate().toString());
             node.put("text",article.getContent());
-            node.put("imgs","");
+            node.put("imgs",urls);
             node.put("star",article.getStar());
             node.put("show",false);
             node.put("id",article.getArticleId());
@@ -53,6 +71,92 @@ public class ArticleController {
         }
         String jsonRes = mapper.writeValueAsString(list);
         return new CommonResult(200,jsonRes);
+    }
+
+    //分页查询
+    @SneakyThrows
+    @GetMapping("/test/{page}/{len}")
+    public Map queryByPageTest(@PathVariable int page,@PathVariable int len){
+
+        ArrayList<ObjectNode> list = new ArrayList<>();
+        List<Article> articles = articleService.getArticlesByPage(page, len);
+        for (Article article : articles) {
+            //处理文章中的图片
+            String imgs = article.getImgs();
+            StringBuilder sb = new StringBuilder();
+            if (imgs!= null&&!"".equals(imgs)){
+                String[] ids = imgs.split(",");
+                for (int i=0;i < ids.length; i++) {
+                    UFile uFile = fileService.queryById(Long.valueOf(ids[i]));
+                    sb.append(uFile.getUrl());
+                    if (i<ids.length-1){
+                        sb.append(",");
+                    }
+                }
+            }
+            String urls = sb.toString();
+            Long userId = article.getUserId();
+            User user = userService.getUser(userId);
+            ObjectNode node = mapper.createObjectNode();
+            ObjectNode userNode = mapper.createObjectNode();
+            userNode.put("nikeName",user.getNikename());
+            userNode.put("rz",user.getAc());
+            userNode.put("url",user.getHeadImg());
+            node.put("user",userNode);
+            node.put("date",article.getDate().toString());
+            node.put("text",article.getContent());
+            node.put("imgs",urls);
+            node.put("star",article.getStar());
+            node.put("show",false);
+            node.put("id",article.getArticleId());
+            node.put("url","#/article/"+article.getArticleId());
+            list.add(node);
+        }
+        String jsonRes = mapper.writeValueAsString(list);
+        HashMap<String, Object> result=new HashMap<>();
+        result.put("code", 0);
+        result.put("msg","");
+        result.put("pages", articles.size());
+        result.put("data", list);
+        return result;
+    }
+
+    @SneakyThrows
+    @GetMapping("/article/{id}")
+    public CommonResult<String> queryArticleById(@PathVariable Long id){
+
+        Article article = articleService.queryArticleById(id);
+        Long userId = article.getUserId();
+        User user = userService.getUser(userId);
+        //处理文章中的图片
+        String imgs = article.getImgs();
+        StringBuilder sb = new StringBuilder();
+        if (imgs!= null&&!"".equals(imgs)){
+            String[] ids = imgs.split(",");
+            for (int i=0;i < ids.length; i++) {
+                UFile uFile = fileService.queryById(Long.valueOf(ids[i]));
+                sb.append(uFile.getUrl());
+                if (i<ids.length-1){
+                    sb.append(",");
+                }
+            }
+        }
+        String urls = sb.toString();
+        ObjectNode userNode = mapper.createObjectNode();
+        userNode.put("nikeName",user.getNikename());
+        userNode.put("rz",user.getAc());
+        userNode.put("img",user.getHeadImg());
+        userNode.put("url","");
+        ObjectNode aNode = mapper.createObjectNode();
+        aNode.put("date",article.getDate().toString());
+        aNode.put("text",article.getContent());
+        aNode.put("id",article.getArticleId());
+        aNode.put("imgs",urls);
+        aNode.put("user",userNode);
+        if (article!=null){
+            return new CommonResult<>(200, mapper.writeValueAsString(aNode));
+        }
+        return new CommonResult<>(500,"请求错误，没有这篇文章！");
     }
 
     //发布文章
@@ -73,10 +177,21 @@ public class ArticleController {
         article.setStar(0);
         article.setTag(map.get("tag"));
         article.setUrl("#/article/1");
+        article.setImgs(map.get("imgs"));
         int i = articleService.pubArticle(article);
         if (i==1){
             return new CommonResult<>(200,"发布成功!");
         }
         return new CommonResult<>(500,"发布失败!");
+    }
+
+    @GetMapping("/articles/count/{id}")
+    public CommonResult<String> count(@PathVariable Long id){
+        int i = articleService.countAdd(id);
+        if(i==1){
+            return new CommonResult<>(200,"更新成功");
+        }else {
+            return new CommonResult<>(500,"更新失败");
+        }
     }
 }

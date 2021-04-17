@@ -12,5 +12,7 @@ public interface ArticleService {
     //分页查询
     List<Article> getArticlesByPage(int pageNum,int len);
 
+    Article queryArticleById(Long id);
 
+    int countAdd(Long id);
 }

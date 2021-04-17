@@ -1,9 +1,8 @@
 package cn.awall.awalladmin.enums;
 
 import lombok.Getter;
-import org.springframework.stereotype.Component;
 
-@Component
+
 @Getter
 public enum LikedStatusEnum {
 
@@ -19,4 +18,6 @@ public enum LikedStatusEnum {
         this.code = code;
         this.msg = msg;
     }
+
+    LikedStatusEnum(){}
 }

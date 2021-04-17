@@ -1,13 +1,22 @@
+#文件存储
+domain: http://localhost:80
+file:
+  upload-path: E://app/
+  staticAccessPath: /upload/**
+  accessPath: /upload/
 server:
   port: 80
 spring:
   datasource:
-    username: root
+#    username: root
+#    password: 123456
+    username: awall
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql:///awall
+    url: jdbc:mysql://81.70.207.162:3306/awall
 mybatis:
   type-aliases-package: cn.awall.awalladmin.pojo
+  mapper-locations: classpath*:cn/awall/awalladmin/dao/*.xml
 
 logging:
   level:

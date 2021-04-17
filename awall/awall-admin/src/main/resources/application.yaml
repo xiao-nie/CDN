@@ -1,10 +1,4 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    password: "000000"
-    url: jdbc:mysql://localhost:3306/awall?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
-    username: root
-
   # Redis连接
   redis:
 #    host: 81.70.207.162
@@ -30,7 +24,7 @@ txsms:
   AppId: 1400496989
   AppKey: 7a36018f765e0d3c5b3cfa433001f655
   templateID: 894527
-  signName: lovelc网11
+  signName: lovelc网a
   min: 5
 
 

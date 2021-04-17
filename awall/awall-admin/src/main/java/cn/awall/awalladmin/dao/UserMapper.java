@@ -11,8 +11,6 @@ import java.util.Map;
 @Mapper
 @Repository
 public interface UserMapper {
-
-
     // 查所有user
     List<User> queryUsers();
 
@@ -40,9 +38,6 @@ public interface UserMapper {
     // 用map修改
     int updateUserByMap(Map map);
 
-    //通过id查询此人是否存在
-    int isUserById(Long userId);
-
     //通过手机号查询此人是否存在
     int queryByIdCount(String tel);
 
@@ -51,5 +46,8 @@ public interface UserMapper {
 
     //通过账号密码登录
     int queryLogin(User user);
+
+    //通过id查询此人是否存在
+    int isUserById(Long userId);
 
 }

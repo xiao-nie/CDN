@@ -4,10 +4,13 @@ import cn.awall.awalladmin.dao.UserMapper;
 import cn.awall.awalladmin.pojo.User;
 import cn.awall.awalladmin.service.UserService;
 import cn.awall.awalladmin.utils.DESUtils;
+import cn.awall.awalladmin.utils.Md5Utils;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -26,7 +29,7 @@ public class UserServiceImpl implements UserService {
 
     //将密码加密
     @Override
-    public String encryption(String salt, String password) {
+    public String encryption(String salt,String password) {
 
         //将盐加密
         String salts = DESUtils.encrypt(salt);
@@ -35,7 +38,7 @@ public class UserServiceImpl implements UserService {
 //        String enPassword = Md5Utils.encoder(password, salts);
         //为用户生成的盐为：3f7dd4
         //加密后的盐为：/KK9f6UG3I4=
-        Md5Hash md5Hash = new Md5Hash(password, salts);
+        Md5Hash md5Hash = new Md5Hash(password,salts);
         System.out.println("加密后的密码为：" + md5Hash);
         return md5Hash.toString();
     }
@@ -61,11 +64,11 @@ public class UserServiceImpl implements UserService {
         //将加密后的密码和未加密的盐放进user
 //        user.setPassword(enPassword);
         user.setSalt(salt);
-        Md5Hash md5Hash = new Md5Hash(password, salt);
+        Md5Hash md5Hash = new Md5Hash(password,salt);
         user.setPassword(md5Hash.toString());
         //将加密后的密码和未加密的盐存到数据库
         int i = userMapper.addUser(user);
-        System.out.println("impl:" + user);
+        System.out.println("impl:"+user);
 
         //判断是否添加成功！
         if (i == 1) {
@@ -112,7 +115,7 @@ public class UserServiceImpl implements UserService {
         System.out.println("为用户" + "生成的盐为：" + salt);
 
         //将密码加密处理
-        String enPassword = encryption(salt, password);
+        String enPassword = encryption(salt,password);
 
         //将加密后的密码和未加密的盐放进user
         user.setPassword(enPassword);

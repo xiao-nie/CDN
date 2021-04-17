@@ -4,18 +4,19 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.awall.awalladmin.dao.ArticleMapper">
     <resultMap id="articleMap" type="article">
-        <id property="articleId" column="article_id"/>
-        <result property="userId" column="user_id"/>
-        <result property="date" column="date"/>
-        <result property="content" column="content"/>
-        <result property="tag" column="tag"/>
-        <result property="url" column="url"/>
-        <result property="classify" column="classify"/>
-        <result property="star" column="star"/>
-        <result property="count" column="count"/>
+        <id property="articleId" column="article_id" />
+        <result property="userId" column="user_id" />
+        <result property="date" column="date" />
+        <result property="content" column="content" />
+        <result property="tag" column="tag" />
+        <result property="url" column="url" />
+        <result property="classify" column="classify" />
+        <result property="star" column="star" />
+        <result property="count" column="count" />
+        <result property="imgs" column="imgs" />
     </resultMap>
     <insert id="addArticle" parameterType="Article">
-        insert into awall.tb_article(user_id, date, content, tag, url, classify, star, count)
+        insert into awall.tb_article(user_id, date, content, tag, url, classify, star, count,imgs)
             VALUE (
                    #{userId},
                    #{date},
@@ -24,7 +25,8 @@
                    #{url},
                    #{classify},
                    #{star},
-                   #{count}
+                   #{count},
+                   #{imgs}
             )
     </insert>
 
@@ -66,17 +68,8 @@
     </update>
 
     <select id="selectByLimit" resultMap="articleMap">
-        select article_id,
-               user_id,
-               date,
-               content,
-               tag,
-               url,
-               classify,
-               star,
-               count
-        from tb_article
-        limit #{start},#{len}
+        select article_id, user_id, date, content, tag, url, classify, star, count,imgs
+        from tb_article order by article_id desc limit #{start},#{len}
     </select>
 
     <select id="selectArticleByArticle" parameterType="Article" resultType="Article">
@@ -113,16 +106,21 @@
         </where>
     </select>
 
-    <select id="queryCountById" resultType="Long" parameterType="String">
-        select count
-        from tb_article
-        where article_id = #{articleId}
+    <select id="queryArticleById" resultMap="articleMap">
+        select article_id, user_id, date, content, tag, url, classify, star, count,imgs
+        from tb_article where article_id = #{ id };
+    </select>
+
+    <select id="queryCountById" resultType="Long" parameterType="Long">
+    select count from tb_article where article_id = #{articleId}
     </select>
 
     <update id="updateCountById" parameterType="Long">
-        update tb_article
-        set count = #{count}
-        where article_id = #{articleId}
+        update tb_article set count = #{count} where article_id = #{articleId}
+    </update>
+
+    <update id="countInc" parameterType="Long">
+        update tb_article set count = count+1 where article_id = #{articleId}
     </update>
 </mapper>
 
