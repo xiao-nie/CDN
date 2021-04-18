@@ -1,0 +1,6 @@
+注册验证码：tel_yzm_reg
+重置密码验证码：tel_yzm_reset
+热度相关
+    历史热度：id_hot_history
+    现在热度：id_hot_now
+    现在热度的持久化：id_hot_now_dao

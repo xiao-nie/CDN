@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.awall.awalladmin.dao.GroupMapper">
+
+    <insert id="addGroup" parameterType="Group">
+        INSERT INTO tb_group(group_id, USER_ID, POST_ID)
+            VALUE (
+                   #{groupId},
+                   #{userId},
+                   #{postId}
+            )
+    </insert>
+
+    <delete id="deleteGroupByTd" parameterType="Long">
+        delete
+        from tb_group
+        where group_id = #{groupId}
+    </delete>
+
+    <update id="updateGroupById" parameterType="Group">
+        update tb_group
+        <set>
+            <if test="userId != null and userId != ''">
+                user_id = #{userId},
+            </if>
+            <if test="postId != null and postId != ''">
+                post_id = #{postId}
+            </if>
+        </set>
+        <where>
+            group_id=#{groupId}
+        </where>
+    </update>
+
+    <select id="selectGroup" parameterType="Group" resultType="Group">
+        select * from tb_group
+        <where>
+            <if test="groupId != null and groupId != ''">
+                and group_id = #{groupId}
+            </if>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="postId != null and postId != ''">
+                and post_id = #{postId}
+            </if>
+        </where>
+    </select>
+
+</mapper>
+

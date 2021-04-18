@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.awall.awalladmin.dao.UrMapper">
+
+    <insert id="addUr">
+        insert into tb_ur(id, user_id, role_id)
+        values (#{id}, #{userId}, #{roleId});
+    </insert>
+
+    <delete id="delUrById">
+        delete
+        from tb_ur
+        where id = #{id}
+    </delete>
+
+    <delete id="delUrByUserId">
+        delete
+        from tb_ur
+        where user_id = #{userId}
+    </delete>
+
+    <delete id="delUrByRoleId">
+        delete
+        from tb_ur
+        where role_id = #{roleId}
+    </delete>
+</mapper>
