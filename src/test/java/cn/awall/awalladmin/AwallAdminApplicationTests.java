@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 @RunWith(SpringRunner.class)
@@ -275,8 +274,6 @@ class AwallAdminApplicationTests {
         Map<Long, Integer> hots = hotService.getHot();
 
         System.out.println("hots = " + hots);
-
-
 
 
     }

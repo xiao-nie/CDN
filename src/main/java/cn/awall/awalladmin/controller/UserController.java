@@ -53,8 +53,14 @@ public class UserController {
     private UserMapper userMapper;
     private String yzm_reg = "_yzm_reg";
     private String yzm_reset = "_yzm_reset";
-    private Long userId;
 
+    /**
+     * 注册时：手机号校验，判断手机号是否存在
+     *
+     * @param data
+     * @return 账号是否允许注册
+     * @throws JsonProcessingException
+     */
     @PostMapping("/tel")
     public String isUser(@RequestBody Object data) throws JsonProcessingException {
 
@@ -74,15 +80,22 @@ public class UserController {
         }
     }
 
+    /**
+     * 注册账号时发送短信
+     *
+     * @param tel
+     * @param session
+     * @return 短信发送情况
+     */
     @RequestMapping("/sms")
     public String sms(String tel, HttpSession session) {
 
-//        检查无效手机号，减轻数据库负担，和验证码安全！
+        //检查无效手机号，减轻数据库负担，和验证码安全！
         if (!MobileUtils.isMobileNO(tel)) {
             return "手机号格式不正确！无法发送验证码！";
         }
 
-//        检测账号是否存在，防止前台没有阻止用户使用已注册的手机号获取注册验证码！
+        //检测账号是否存在，防止前台没有阻止用户使用已注册的手机号获取注册验证码！
         if (!userService.isUser(tel)) {
             return "账号已存在，不允许发送验证码!";
         }
@@ -95,7 +108,6 @@ public class UserController {
 
         //发送短信！
         String Msg = txSmsTemplate.sendMesModel(tel, yzm);
-
         System.out.println(Msg);
 
         //将手机号和验证码放到Redis中
@@ -103,18 +115,28 @@ public class UserController {
         return "短信发送成功";
     }
 
+    /**
+     * 接受注册的数据
+     *
+     * @param token
+     * @return 注册成功与否
+     * @throws JsonProcessingException
+     */
     @PostMapping("/register")
     public String register(@RequestBody Object token) throws JsonProcessingException {
         System.out.println("用户注册");
         Map<String, String> map = new ObjectMapper().readValue(JSON.toJSONString(token), Map.class);
+        //检测手机验证码是否正确
         if (!map.get("code").equals(redisUtils.get(map.get("tel") + yzm_reg))) {
             return "验证码错误！";
         }
+        //封装成user
         User user = new User();
         user.setTel(map.get("tel"));
         user.setPassword(map.get("password"));
         user.setNikename(map.get("nikename"));
         System.out.println("register controller:" + user);
+        //用户注册
         boolean register = userService.register(user);
         if (register) {
             return "注册成功！";
@@ -124,19 +146,22 @@ public class UserController {
 
     }
 
-
+    /**
+     * 用户登录
+     *
+     * @param response
+     * @param object
+     * @param request
+     * @return 登录是否成功
+     * @throws JsonProcessingException
+     */
     @PostMapping("/login")
     public CommonResult<String> login(HttpServletResponse response, @RequestBody Object object, HttpServletRequest request) throws JsonProcessingException {
-//
-//        response.addHeader("Access-Control-Allow-Origin", "http://localhost:8080");
-//        response.addHeader("Access-Control-Allow-Credentials", "true");
 
         //打印前端传来的对象
         System.out.println("Object:" + JSON.toJSONString(object));
 
-        //打印服务器验证码
-//        System.out.println(session.getAttribute("verifyCode"));
-        System.out.println("yanzhengma1" + request.getSession().getAttribute("verifyCode"));
+        System.out.println("verifyCode" + request.getSession().getAttribute("verifyCode"));
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> map = objectMapper.readValue(JSON.toJSONString(object), Map.class);
@@ -153,7 +178,6 @@ public class UserController {
         if (!request.getSession().getAttribute("verifyCode").equals(map.get("code"))) {
             return new CommonResult<>(500, "验证码错误");
         }
-//        boolean login = userService.login(user);
         Subject subject = SecurityUtils.getSubject();
         try {
             subject.login(new UsernamePasswordToken(user.getTel(), user.getPassword()));
@@ -168,8 +192,12 @@ public class UserController {
 
     }
 
-    /* 获取验证码图片*/
-
+    /**
+     * 获取图片验证码
+     *
+     * @param response
+     * @param request
+     */
     @RequestMapping("/getVerifyCode")
     public void getVerificationCode(HttpServletResponse response, HttpServletRequest request) {
 
@@ -180,11 +208,9 @@ public class UserController {
             BufferedImage verifyImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
             //生成对应宽高的初始图片
-
             String randomText = VerifyCode.drawRandomText(width, height, verifyImg);
 
             //单独的一个类方法，出于代码复用考虑，进行了封装。
-
             //功能是生成验证码字符并加上噪点，干扰线，返回值为验证码字符
 
             request.getSession().setAttribute("verifyCode", randomText);
@@ -207,6 +233,12 @@ public class UserController {
 
     }
 
+    /**
+     * 重置密码时手机号校验
+     *
+     * @param tel
+     * @return 是否可以重置密码
+     */
     @PostMapping("/resettel")
     public String resetisUser(String tel) {
 
@@ -219,8 +251,14 @@ public class UserController {
         else return "OK！";
     }
 
+    /**
+     * 重置密码时发送手机验证码
+     *
+     * @param tel
+     * @return 短信发送情况
+     */
     @RequestMapping("/resetsms")
-    public String resetsms(String tel, HttpSession session) {
+    public String resetsms(String tel) {
 
         //检查无效手机号，减轻数据库负担，和验证码安全！
         if (!MobileUtils.isMobileNO(tel)) {
@@ -249,6 +287,13 @@ public class UserController {
         return "短信发送成功";
     }
 
+    /**
+     * 重置密码
+     *
+     * @param user
+     * @param yzm
+     * @return 是否重置成功
+     */
     @RequestMapping("/reset")
     public String reset(User user, String yzm) {
 
@@ -266,18 +311,23 @@ public class UserController {
             return "验证码错误！";
         }
 
-        //校验成功后从redis中清除验证码！
-//        redisUtils.del(user.getTel());
-
         boolean reset = userService.reset(user);
 
         if (reset) {
+            //修改成功后从redis中清除验证码！
+            redisUtils.del(user.getTel());
             return "修改成功！";
         } else {
             return "修改失败！";
         }
     }
 
+    /**
+     * 获取该User信息
+     *
+     * @param id
+     * @return 该User信息
+     */
     @SneakyThrows
     @PostMapping("/user/getUser/{id}")
     public CommonResult<String> getUser(@PathVariable Long id) {
@@ -290,7 +340,12 @@ public class UserController {
         }
     }
 
-    // 是否登录
+    /**
+     * 判断是否登录
+     *
+     * @param request
+     * @return 判断是否登录
+     */
     @GetMapping("/isLogin")
     public boolean isLogin(HttpServletRequest request) {
         try {
@@ -302,6 +357,13 @@ public class UserController {
         return true;
     }
 
+    /**
+     * 通过id获取该用户信息
+     *
+     * @param userId
+     * @return 用户信息的json数据
+     * @throws JsonProcessingException
+     */
     @RequestMapping("/getInfo/{userId}")
     public CommonResult<String> getInfo(@PathVariable("userId") Long userId) throws JsonProcessingException {
 
@@ -317,8 +379,14 @@ public class UserController {
 
     }
 
+    /**
+     * 获取该用户所有的粉丝信息
+     *
+     * @param userId
+     * @return 所有粉丝信息的json数据
+     */
     @RequestMapping("/getFans/{userId}")
-    public Map getFans(@PathVariable("userId") Long userId){
+    public Map getFans(@PathVariable("userId") Long userId) {
 
         ArrayList<ObjectNode> list = new ArrayList<>();
 
@@ -329,16 +397,22 @@ public class UserController {
             list.add(node);
         }
 
-        HashMap<String, Object> result=new HashMap<>();
-        result.put("code",0);
-        result.put("msg","");
-        result.put("data",list);
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("code", 0);
+        result.put("msg", "");
+        result.put("data", list);
         return result;
 
     }
 
+    /**
+     * 获取该用户订阅的所有用户信息
+     *
+     * @param userId
+     * @return 所有订阅的用户的信息的json数据
+     */
     @RequestMapping("/getSub/{userId}")
-    public Map getSub(@PathVariable("userId") Long userId){
+    public Map getSub(@PathVariable("userId") Long userId) {
 
         ArrayList<ObjectNode> list = new ArrayList<>();
 
@@ -349,40 +423,12 @@ public class UserController {
             list.add(node);
         }
 
-        HashMap<String, Object> result=new HashMap<>();
-        result.put("code",0);
-        result.put("msg","");
-        result.put("data",list);
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("code", 0);
+        result.put("msg", "");
+        result.put("data", list);
         return result;
 
     }
-
-    @RequestMapping("/getIP")
-    public String getIp(HttpServletRequest request){
-        String remoteAddr = request.getRemoteAddr();
-        String forwarded = request.getHeader("X-Forwarded-For");
-        String realIp = request.getHeader("X-Real-IP");
-
-        String ip = null;
-        if (realIp == null) {
-            if (forwarded == null) {
-                ip = remoteAddr;
-            } else {
-                ip = remoteAddr + "/" + forwarded.split(",")[0];
-            }
-        } else {
-            if (realIp.equals(forwarded)) {
-                ip = realIp;
-            } else {
-                if(forwarded != null){
-                    forwarded = forwarded.split(",")[0];
-                }
-                ip = realIp + "/" + forwarded;
-            }
-        }
-        System.out.println("ip = " + ip);
-        return ip;
-    }
-
 
 }

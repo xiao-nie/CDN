@@ -11,6 +11,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
+//发展党员各个时间点计算
 @Controller
 public class TimeController {
 
@@ -25,7 +26,15 @@ public class TimeController {
         return "index";
     }
 
-
+    /**
+     * 通过用户入学时间，以及是否在学校上党课，和发展对象时间
+     * 来计算用户发展对象阶段所需填写各种信息的时间
+     * @param school
+     * @param entrance
+     * @param train
+     * @param obj
+     * @return 用户发展对象阶段所需填写各种信息的时间
+     */
     @RequestMapping("/time")
     @ResponseBody
     public String time(String school, String entrance, String train, String obj) {
